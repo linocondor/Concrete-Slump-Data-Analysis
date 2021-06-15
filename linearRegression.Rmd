@@ -1,0 +1,105 @@
+---
+title: "Linear Regression"
+output: html_notebook
+---
+This is a Linear Regression analysis using Concrete Slump Data.
+
+The UCI Machine Learning Repository has this dataset containing diferent variables (Cement, Slag, Fly ash, Water, SP, Coarse Aggr., Fine Aggr., SLUMP, FLOW, 28-day Compressive Strength). 
+
+The dataset is maintained on their site, where it can be found by the title "Concrete Slump Test Data Set".
+
+<b>Citation:</b>
+Yeh, I-Cheng, "Modeling slump flow of concrete using second-order regressions and artificial neural networks," Cement and Concrete Composites, Vol.29, No. 6, 474-480, 2007.
+
+
+
+```{r}
+# Data Preprocessing
+
+# Importing the dataset
+#install.packages("tidyverse")
+#library(readxl)
+dataset = read_excel("Concrete_Data.xls")
+dataset
+```
+```{r}
+#Choose data for simple linear regresion
+#install.packages("tidyverse")
+#library(tidyverse)
+dataset_simpleLR <- dataset %>% select(1,9)
+dataset_simpleLR
+```
+
+
+```{r}
+
+# Splitting the dataset into the Training set and Test set
+#install.packages('caTools')
+#library(caTools)
+split = sample.split(dataset_simpleLR$`Concrete compressive strength(MPa, megapascals)`, SplitRatio = 0.8)
+training_set = subset(dataset_simpleLR, split == TRUE)
+test_set = subset(dataset_simpleLR, split == FALSE)
+
+```
+```{r}
+print(training_set)
+```
+```{r}
+print(test_set)
+```
+```{r}
+#fitting simple linear regression to the training set
+regressor = lm(formula = `Concrete compressive strength(MPa, megapascals)` ~ `Cement (component 1)(kg in a m^3 mixture)`, data = training_set)
+summary(regressor)
+```
+
+```{r}
+#Predicting test results
+y_pred = predict(regressor, newdata = test_set)
+
+```
+
+```{r}
+#Visualizing
+#library(ggplot2)
+#Visualizing the Training set results
+#dots
+a <- ggplot() 
+b <- a + geom_point(aes(x = training_set$`Cement (component 1)(kg in a m^3 mixture)`, y = training_set$`Concrete compressive strength(MPa, megapascals)`),colour = 'red')
+
+#linear regresion line
+c <- b + geom_line(aes(x = training_set$`Cement (component 1)(kg in a m^3 mixture)`, y = predict(regressor, newdata = training_set)), colour = 'blue')
+
+
+#labels
+d <- c + ggtitle('Concrete compressive strength (Mpa) vs. Cement (kg/m^3)') + xlab('Cement (kg/m^3)') + ylab('Concrete compressive strength (Mpa)')
+d
+```
+```{r}
+#Test Set
+a1 <- ggplot() 
+b1 <- a1 + geom_point(aes(x = test_set$`Cement (component 1)(kg in a m^3 mixture)`, y = test_set$`Concrete compressive strength(MPa, megapascals)`),colour = 'red')
+
+#linear regresion line
+c1 <- b1 + geom_line(aes(x = training_set$`Cement (component 1)(kg in a m^3 mixture)`, y = predict(regressor, newdata = training_set)), colour = 'blue') 
+
+
+#labels
+d1 <- c1 + ggtitle('Concrete compressive strength (Mpa) vs. Cement (kg/m^3)') + xlab('Cement (kg/m^3)') + ylab('Concrete compressive strength (Mpa)')
+d1
+```
+```{r}
+#Test Set Points
+a2 <- ggplot() 
+b2 <- a2 + geom_point(aes(x = test_set$`Cement (component 1)(kg in a m^3 mixture)`, y = test_set$`Concrete compressive strength(MPa, megapascals)`),colour = 'red')
+
+#linear regresion line
+c2 <- b2 + geom_line(aes(x = training_set$`Cement (component 1)(kg in a m^3 mixture)`, y = predict(regressor, newdata = training_set)), colour = 'blue') + geom_point(aes(x = test_set$`Cement (component 1)(kg in a m^3 mixture)`, y = y_pred),colour = 'black')
+
+
+#labels
+d2 <- c2 + ggtitle('Concrete compressive strength (Mpa) vs. Cement (kg/m^3)') + xlab('Cement (kg/m^3)') + ylab('Concrete compressive strength (Mpa)')
+d2
+```
+
+
