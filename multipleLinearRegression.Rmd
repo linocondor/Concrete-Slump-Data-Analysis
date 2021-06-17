@@ -1,0 +1,105 @@
+---
+title: "Multiple linear Regresion"
+output: html_notebook
+---
+
+This is a Multiple Linear Regression analysis using Concrete Slump Data.
+
+The UCI Machine Learning Repository has this dataset containing diferent variables (Cement, Slag, Fly ash, Water, SP, Coarse Aggr., Fine Aggr., SLUMP, FLOW, 28-day Compressive Strength). 
+
+The dataset is maintained on their site, where it can be found by the title "Concrete Slump Test Data Set".
+
+<b>Citation:</b>
+Yeh, I-Cheng, "Modeling slump flow of concrete using second-order regressions and artificial neural networks," Cement and Concrete Composites, Vol.29, No. 6, 474-480, 2007.
+
+
+
+```{r}
+# Data Preprocessing Template
+
+# Importing the dataset
+#install.packages("tidyverse")
+library(readxl)
+dataset = read_excel("Concrete_Data.xls")
+dataset
+```
+```{r}
+#Split in training and test set
+library(caTools)
+split = sample.split(dataset$`Concrete compressive strength(MPa, megapascals)`, SplitRatio = 0.8)
+training_set = subset(dataset, split == TRUE)
+test_set = subset(dataset, split == FALSE)
+```
+```{r}
+print(training_set)
+```
+```{r}
+print(test_set)
+```
+```{r}
+#---------------------------------
+#building backward elimintation
+regressor = lm(formula = `Concrete compressive strength(MPa, megapascals)` ~., data = dataset) #to see which variable is significanse
+summary(regressor)  #Pr in percentage
+```
+Predictions with all variables
+```{r}
+#predict with test set
+regressor_1 = lm(formula = `Concrete compressive strength(MPa, megapascals)` ~., data = training_set) #to see which variable is significanse
+summary(regressor_1)  #Pr in percentage
+y_pred_1= predict(regressor_1, newdata = test_set)
+y_pred_error = sum(abs(y_pred_1 - test_set$`Concrete compressive strength(MPa, megapascals)`))/length(y_pred_1)
+
+cat("Median Error ", y_pred_error)
+
+```
+```{r}
+library(ggplot2)
+a1 <- ggplot() 
+b1 <- a1 + geom_point(aes(y = y_pred_1, x = (1:length(y_pred_2))),colour = 'red')
+
+#linear regresion line
+c1 <- b1 + geom_point(aes(y = test_set$`Concrete compressive strength(MPa, megapascals)`, x = (1:length(y_pred_2))),colour = 'blue')
+
+
+#labels
+d1 <- c1 + ggtitle('Concrete compressive strength (Mpa) [predicitons red, real blue] vs. count') + xlab('Count') + ylab('Concrete compressive strength (Mpa)')
+d1
+
+```
+Predictions with outvariables Fine Aggregate and Coarse Aggregate
+
+```{r}
+#---------------------------------
+#building backward elimintation - `Fine Aggregate (component 7)(kg in a m^3 mixture)` - `Coarse Aggregate  (component 6)(kg in a m^3 mixture)`
+regressor_1 = lm(formula = `Concrete compressive strength(MPa, megapascals)` ~.-`Fine Aggregate (component 7)(kg in a m^3 mixture)`-`Coarse Aggregate  (component 6)(kg in a m^3 mixture)`, data = dataset) #to see which variable is significanse
+summary(regressor_1)  #Pr in percentage
+```
+
+```{r}
+
+#predict with test set
+regressor_2 = lm(formula = `Concrete compressive strength(MPa, megapascals)` ~.-`Fine Aggregate (component 7)(kg in a m^3 mixture)`-`Coarse Aggregate  (component 6)(kg in a m^3 mixture)`, data = training_set) #to see which variable is significanse
+summary(regressor_2)  #Pr in percentage
+y_pred_2= predict(regressor_2, newdata = test_set)
+y_pred_error_2 = sum(abs(y_pred_2 - test_set$`Concrete compressive strength(MPa, megapascals)`))/length(y_pred_2)
+
+cat("Median Error ", y_pred_error_2)
+
+```
+```{r}
+library(ggplot2)
+a2 <- ggplot() 
+b2 <- a2 + geom_point(aes(y = y_pred_2, x = (1:length(y_pred_2))),colour = 'red')
+
+#linear regresion line
+c2 <- b2 + geom_point(aes(y = test_set$`Concrete compressive strength(MPa, megapascals)`, x = (1:length(y_pred_2))),colour = 'blue')
+
+
+#labels
+d2 <- c2 + ggtitle('Concrete compressive strength (Mpa) [predicitons red, real blue] vs. count') + xlab('Count') + ylab('Concrete compressive strength (Mpa)')
+d2
+
+
+
+```
